@@ -1,4 +1,22 @@
 import time
+from flask import Flask, render_template
+from news_utils import get_news_list_with_similarity
+import os
+import requests
+from bs4 import BeautifulSoup
+
+
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+}
+
+def calculate_similarity(title, content):
+    if content == "[본문 크롤링 실패]":
+        return 0.0
+    embeddings = model.encode([title, content])
+    similarity = util.cos_sim(embeddings[0], embeddings[1]).item()
+    return round(similarity * 100, 2)
+
 
 _cached_news = None
 _last_crawl_time = 0
