@@ -1,29 +1,20 @@
-import requests
-from bs4 import BeautifulSoup
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import torch
-import torch.nn.functional as F
+import time
 
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-}
-
-# 경량 모델 로드 (한 번만 로딩)
-tokenizer = AutoTokenizer.from_pretrained("monologg/koelectra-base-v3-nli")
-model = AutoModelForSequenceClassification.from_pretrained("monologg/koelectra-base-v3-nli")
-model.eval()
-
-def calculate_similarity(title, content):
-    if content == "[본문 크롤링 실패]":
-        return 0.0
-    inputs = tokenizer(title, content, return_tensors="pt", truncation=True)
-    with torch.no_grad():
-        outputs = model(**inputs)
-        probs = F.softmax(outputs.logits, dim=1)
-        similarity_score = probs[0][2].item()  # entailment 확률
-    return round(similarity_score * 100, 2)
+_cached_news = None
+_last_crawl_time = 0
+CACHE_DURATION = 300  # 5분 (초 단위)
 
 def get_news_list_with_similarity():
+    global _cached_news, _last_crawl_time
+    current_time = time.time()
+    if _cached_news is None or (current_time - _last_crawl_time) > CACHE_DURATION:
+        # 5분 넘었거나 처음 호출 시만 새로 크롤링
+        _cached_news = _crawl_news()
+        _last_crawl_time = current_time
+    return _cached_news
+
+def _crawl_news():
+    # 기존 get_news_list_with_similarity 코드 안쪽 내용 복사해서 여기 넣기
     url = "https://news.naver.com/main/ranking/popularDay.naver"
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -103,7 +94,7 @@ def get_news_list_with_similarity():
             seen_titles.add(title)
             seen_urls.add(article_url)
 
-            if len(news_data) >= 11:
+            if len(news_data) >= 11:  # 가이드 1개 + 뉴스 10개
                 break
 
         except Exception as e:
