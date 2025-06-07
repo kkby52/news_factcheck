@@ -1,19 +1,27 @@
 import requests
 from bs4 import BeautifulSoup
-from sentence_transformers import SentenceTransformer, util
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
+import torch.nn.functional as F
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 }
 
-model = SentenceTransformer("snunlp/KR-SBERT-V40K-klueNLI-augSTS")
+# 경량 모델 로드 (한 번만 로딩)
+tokenizer = AutoTokenizer.from_pretrained("monologg/koelectra-base-v3-nli")
+model = AutoModelForSequenceClassification.from_pretrained("monologg/koelectra-base-v3-nli")
+model.eval()
 
 def calculate_similarity(title, content):
     if content == "[본문 크롤링 실패]":
         return 0.0
-    embeddings = model.encode([title, content])
-    similarity = util.cos_sim(embeddings[0], embeddings[1]).item()
-    return round(similarity * 100, 2)
+    inputs = tokenizer(title, content, return_tensors="pt", truncation=True)
+    with torch.no_grad():
+        outputs = model(**inputs)
+        probs = F.softmax(outputs.logits, dim=1)
+        similarity_score = probs[0][2].item()  # entailment 확률
+    return round(similarity_score * 100, 2)
 
 def get_news_list_with_similarity():
     url = "https://news.naver.com/main/ranking/popularDay.naver"
@@ -30,7 +38,6 @@ def get_news_list_with_similarity():
         title = article.get_text(strip=True)
         href = article.get("href")
 
-        # 첫 번째 안내용 뉴스
         if "랭킹" in title and idx == 0:
             news_data.append({
                 "title": f"{title}",
@@ -96,7 +103,7 @@ def get_news_list_with_similarity():
             seen_titles.add(title)
             seen_urls.add(article_url)
 
-            if len(news_data) >= 6:  # 가이드 1개 + 뉴스 10개
+            if len(news_data) >= 11:
                 break
 
         except Exception as e:
