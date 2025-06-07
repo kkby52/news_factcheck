@@ -1,42 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>네이버 뉴스 랭킹</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 30px;
-            background-color: #f5f5f5;
-        }
-        h1 {
-            color: #333;
-        }
-        .news {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
-        }
-        .news-title {
-            font-weight: bold;
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        .news-link {
-            font-size: 14px;
-            color: #0066cc;
-        }
-    </style>
+    <meta charset="utf-8">
+    <title>AI 뉴스 신뢰도 평가</title>
 </head>
 <body>
-    <h1>📢 네이버 뉴스 랭킹</h1>
+    <h1>AI 뉴스 신뢰도 평가 결과</h1>
     {% for news in news_list %}
-        <div class="news">
-            <div class="news-title">{{ news.title }}</div>
-            <a class="news-link" href="{{ news.link }}" target="_blank">[기사 보러가기]</a>
-        </div>
+        {% if news.is_guide %}
+            <h2>📌 {{ news.title }}</h2>
+        {% else %}
+            <div>
+                <h3>{{ news.title }}</h3>
+                <p><strong>신뢰도:</strong> {{ news.similarity }}%</p>
+                <p>{{ news.content[:100] }}...</p>
+                {% if news.image %}
+                    <img src="{{ news.image }}" alt="뉴스 이미지" width="200">
+                {% endif %}
+                {% if news.url %}
+                    <p><a href="{{ news.url }}" target="_blank">원문 보기</a></p>
+                {% endif %}
+            </div>
+            <hr>
+        {% endif %}
     {% endfor %}
 </body>
 </html>
