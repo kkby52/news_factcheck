@@ -10,4 +10,6 @@ def index():
     return render_template('index.html', news_list=news_list)
 
 if __name__ == "__main__":
-   app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
+    host = "0.0.0.0"
+    port = int(os.getenv("PORT", "10000"))
+    app.run(host=host, port=port)
