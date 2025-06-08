@@ -1,18 +1,17 @@
 import requests
 from bs4 import BeautifulSoup
-from sentence_transformers import SentenceTransformer, util
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 }
 
-model = SentenceTransformer("snunlp/KR-SBERT-V40K-klueNLI-augSTS")
-
 def calculate_similarity(title, content):
     if content == "[본문 크롤링 실패]":
         return 0.0
-    embeddings = model.encode([title, content])
-    similarity = util.cos_sim(embeddings[0], embeddings[1]).item()
+    vectorizer = TfidfVectorizer().fit_transform([title, content])
+    similarity = cosine_similarity(vectorizer[0:1], vectorizer[1:2]).item()
     return round(similarity * 100, 2)
 
 def get_news_list_with_similarity():
@@ -30,7 +29,6 @@ def get_news_list_with_similarity():
         title = article.get_text(strip=True)
         href = article.get("href")
 
-        # 첫 번째 안내용 뉴스
         if "랭킹" in title and idx == 0:
             news_data.append({
                 "title": f"{title}",
@@ -96,7 +94,7 @@ def get_news_list_with_similarity():
             seen_titles.add(title)
             seen_urls.add(article_url)
 
-            if len(news_data) >= 11:  # 가이드 1개 + 뉴스 10개
+            if len(news_data) >= 11:
                 break
 
         except Exception as e:
