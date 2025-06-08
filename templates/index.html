@@ -1,32 +1,21 @@
+<!-- templates/index.html -->
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>뉴스 신뢰도 분석</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .news { margin-bottom: 30px; border-bottom: 1px solid #ccc; padding-bottom: 20px; }
-        img { max-width: 300px; height: auto; display: block; margin-top: 10px; }
-        .guide { font-size: 1.2em; font-weight: bold; color: darkblue; margin-top: 20px; }
-    </style>
+    <meta charset="utf-8">
+    <title>뉴스 신뢰도</title>
 </head>
 <body>
-    <h1>📰 오늘의 뉴스 신뢰도 분석</h1>
-
-    {% for news in news_list %}
-        <div class="news">
-            {% if news.is_guide %}
-                <div class="guide">📌 {{ news.title }}</div>
-            {% else %}
-                <h2>{{ news.title }}</h2>
-                <p><strong>신뢰도:</strong> {{ news.similarity }}%</p>
-                <p>{{ news.content[:200] }}...</p>
-                {% if news.image %}
-                    <img src="{{ news.image }}" alt="뉴스 이미지">
-                {% endif %}
-                <p><a href="{{ news.url }}" target="_blank">🔗 기사 보기</a></p>
+    <h1>뉴스 신뢰도 TOP 10</h1>
+    <ul>
+        {% for item in news %}
+        <li>
+            <strong>{{ item.title }}</strong>
+            {% if item.similarity is not none %}
+                - 신뢰도: {{ item.similarity }}%
             {% endif %}
-        </div>
-    {% endfor %}
+        </li>
+        {% endfor %}
+    </ul>
 </body>
 </html>

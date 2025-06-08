@@ -1,9 +1,6 @@
-Flask==3.0.2
-gunicorn==21.2.0
-sentence-transformers==2.6.1
-transformers==4.41.1
-torch==2.1.2           # 예시: Hugging Face 모델과 호환 안정적인 버전
-requests==2.31.0
-beautifulsoup4==4.12.3
-scikit-learn==1.4.2
-
+Flask
+sentence-transformers
+requests
+beautifulsoup4
+torch
+gunicorn
