@@ -1,6 +1,8 @@
-Flask
-sentence-transformers
+Flask==3.0.2
+gunicorn==21.2.0
+sentence-transformers==2.6.1
+transformers==4.41.1
+torch>=2.0.0
 requests
 beautifulsoup4
-torch
-gunicorn
+scikit-learn
