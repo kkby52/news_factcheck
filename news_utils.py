@@ -10,9 +10,15 @@ headers = {
 def calculate_similarity(title, content):
     if content == "[본문 크롤링 실패]":
         return 0.0
+
     vectorizer = TfidfVectorizer().fit_transform([title, content])
     similarity = cosine_similarity(vectorizer[0:1], vectorizer[1:2]).item()
-    return round(similarity * 100, 2)
+
+    # 비선형 스케일링: 0~0.15 구간 → 30~85 범위로 조정
+    raw = min(similarity, 0.15)
+    scaled = 30 + 55 * (raw / 0.15) ** 0.7
+
+    return round(scaled, 2)
 
 def get_news_list_with_similarity():
     url = "https://news.naver.com/main/ranking/popularDay.naver"
@@ -53,6 +59,24 @@ def get_news_list_with_similarity():
             if real_title_tag:
                 title = real_title_tag.get_text(strip=True)
 
+            img_tag = article_soup.select_one("img")
+            image_url = img_tag["src"] if img_tag and img_tag.has_attr("src") else None
+
+            # 7번째 뉴스는 제목과 이미지만 출력, 나머지 정보 제외
+            if len(news_data) == 6:
+                news_data.append({
+                    "title": title,
+                    "content": None,
+                    "image": image_url,
+                    "url": None,
+                    "is_guide": False,
+                    "similarity": None
+                })
+                seen_titles.add(title)
+                seen_urls.add(article_url)
+                continue
+
+            # 본문 크롤링
             selectors = [
                 "#articleBodyContents",
                 "div#articleBody",
@@ -76,9 +100,6 @@ def get_news_list_with_similarity():
 
             if not content:
                 content = "[본문 크롤링 실패]"
-
-            img_tag = article_soup.select_one("img")
-            image_url = img_tag["src"] if img_tag and img_tag.has_attr("src") else None
 
             similarity = calculate_similarity(title, content)
 
