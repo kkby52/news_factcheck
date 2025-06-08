@@ -19,12 +19,22 @@
                 <div class="guide">📌 {{ news.title }}</div>
             {% else %}
                 <h2>{{ news.title }}</h2>
-                <p><strong>신뢰도:</strong> {{ news.similarity }}%</p>
-                <p>{{ news.content[:200] }}...</p>
+
+                {% if news.similarity is not none %}
+                    <p><strong>신뢰도:</strong> {{ news.similarity }}%</p>
+                {% endif %}
+
+                {% if news.content %}
+                    <p>{{ news.content[:200] }}...</p>
+                {% endif %}
+
                 {% if news.image %}
                     <img src="{{ news.image }}" alt="뉴스 이미지">
                 {% endif %}
-                <p><a href="{{ news.url }}" target="_blank">🔗 기사 보기</a></p>
+
+                {% if news.url %}
+                    <p><a href="{{ news.url }}" target="_blank">🔗 기사 보기</a></p>
+                {% endif %}
             {% endif %}
         </div>
     {% endfor %}
