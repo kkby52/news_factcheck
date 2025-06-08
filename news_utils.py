@@ -12,7 +12,7 @@ def calculate_similarity(title, content):
         return 0.0
     vectorizer = TfidfVectorizer().fit_transform([title, content])
     similarity = cosine_similarity(vectorizer[0:1], vectorizer[1:2]).item()
-    return round(similarity * 5000, 2)
+    return round(similarity * 100, 2)
 
 def get_news_list_with_similarity():
     url = "https://news.naver.com/main/ranking/popularDay.naver"
