@@ -12,7 +12,7 @@ def calculate_similarity(title, content):
         return 0.0
     vectorizer = TfidfVectorizer().fit_transform([title, content])
     similarity = cosine_similarity(vectorizer[0:1], vectorizer[1:2]).item()
-    return round(similarity * 100 * 6, 2)
+    return round(similarity * 100 * 3, 2)
 
 def get_news_list_with_similarity():
     url = "https://news.naver.com/main/ranking/popularDay.naver"
@@ -42,6 +42,8 @@ def get_news_list_with_similarity():
 
         article_url = href if href.startswith("https") else "https://news.naver.com" + href
 
+        similarity = calculate_similarity(title, content)
+        
         if title in seen_titles or article_url in seen_urls:
             continue
 
@@ -75,7 +77,11 @@ def get_news_list_with_similarity():
                     content = " ".join(p.get_text(strip=True) for p in paragraphs)
 
             if not content:
-                content = "[본문 크롤링 실패]"
+                content = " "
+                article_url = ""
+                similarity = ""
+            else:
+                similarity = calculate_similarity(title, content)
 
             img_tag = article_soup.select_one("img")
             image_url = img_tag["src"] if img_tag and img_tag.has_attr("src") else None
@@ -94,7 +100,7 @@ def get_news_list_with_similarity():
             seen_titles.add(title)
             seen_urls.add(article_url)
 
-            if len(news_data) >= 6:
+            if len(news_data) >= 11:
                 break
 
         except Exception as e:
