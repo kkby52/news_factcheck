@@ -42,8 +42,6 @@ def get_news_list_with_similarity():
 
         article_url = href if href.startswith("https") else "https://news.naver.com" + href
 
-        similarity = calculate_similarity(title, content)
-        
         if title in seen_titles or article_url in seen_urls:
             continue
 
@@ -77,11 +75,7 @@ def get_news_list_with_similarity():
                     content = " ".join(p.get_text(strip=True) for p in paragraphs)
 
             if not content:
-                content = " "
-                article_url = ""
-                similarity = ""
-            else:
-                similarity = calculate_similarity(title, content)
+                content = "[본문 크롤링 실패]"
 
             img_tag = article_soup.select_one("img")
             image_url = img_tag["src"] if img_tag and img_tag.has_attr("src") else None
@@ -100,7 +94,7 @@ def get_news_list_with_similarity():
             seen_titles.add(title)
             seen_urls.add(article_url)
 
-            if len(news_data) >= 11:
+            if len(news_data) >= 6:
                 break
 
         except Exception as e:
